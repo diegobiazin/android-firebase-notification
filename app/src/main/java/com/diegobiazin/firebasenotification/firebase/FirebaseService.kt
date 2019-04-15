@@ -18,6 +18,7 @@ import com.bumptech.glide.load.engine.GlideException
 import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.diegobiazin.firebasenotification.MainActivity
+import com.diegobiazin.firebasenotification.NotificationActivity
 import com.diegobiazin.firebasenotification.R
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
@@ -36,17 +37,15 @@ class FirebaseService : FirebaseMessagingService() {
             val mensagem = "$msg -- $nome -- $urlImagem"
 
             sendNotification_2(titulo, mensagem, urlImagem)
-        }
+        } else if (remoteMessage.notification != null) {
+            Log.d("diegobiazin.com", remoteMessage.notification?.title)
+            Log.d("diegobiazin.com", remoteMessage.notification?.body)
 
-//        if (remoteMessage.notification != null) {
-//            Log.d("diegobiazin.com", remoteMessage.notification?.title)
-//            Log.d("diegobiazin.com", remoteMessage.notification?.body)
-//
-//            val titulo: String? = remoteMessage.notification?.title
-//            val msg: String? = remoteMessage.notification?.body
-//
-//            sendNotification_1(titulo, msg)
-//        }
+            val titulo: String? = remoteMessage.notification?.title
+            val msg: String? = remoteMessage.notification?.body
+
+            sendNotification_1(titulo, msg)
+        }
     }
 
     private fun sendNotification_1(titulo: String?, msg: String?) {
@@ -97,7 +96,9 @@ class FirebaseService : FirebaseMessagingService() {
                 dataSource: DataSource?,
                 isFirstResource: Boolean
             ): Boolean {
-                val intent: Intent = Intent(baseContext, MainActivity::class.java)
+                val intent: Intent = Intent(baseContext, NotificationActivity::class.java)
+                intent.putExtra("url", url)
+                intent.putExtra("mensagem", msg)
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
 
                 val pendingIntent = PendingIntent.getActivity(baseContext, 0, intent, PendingIntent.FLAG_ONE_SHOT)
@@ -113,7 +114,7 @@ class FirebaseService : FirebaseMessagingService() {
                     .setSound(sound)
                     .setAutoCancel(true)
                     .setLargeIcon(bitmap)
-            .setStyle(NotificationCompat.BigPictureStyle().bigPicture(bitmap))
+                    .setStyle(NotificationCompat.BigPictureStyle().bigPicture(bitmap))
 //                    .setStyle(NotificationCompat.BigTextStyle().bigText(msg))
                     .setContentIntent(pendingIntent)
 
