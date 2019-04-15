@@ -4,6 +4,7 @@ import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
@@ -26,11 +27,29 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
         when (view.id) {
             R.id.switch_Sports -> {
                 val statusSports: Boolean = switch_Sports.isChecked
-                Toast.makeText(this, "Switch Sports $statusSports", Toast.LENGTH_LONG).show()
+
+                if (statusSports) {
+                    FirebaseMessaging.getInstance().subscribeToTopic("sports")
+                    Toast.makeText(this, "Inscrição Sports Realizada com Sucesso", Toast.LENGTH_LONG).show()
+                }
+                else {
+                    FirebaseMessaging.getInstance().unsubscribeFromTopic("sports")
+                    Toast.makeText(this, "Inscrição Sports Cancelada", Toast.LENGTH_LONG).show()
+                }
+
+
             }
             R.id.switch_Politica -> {
                 val statusPolitica: Boolean = switch_Politica.isChecked
-                Toast.makeText(this, "Switch Política $statusPolitica", Toast.LENGTH_LONG).show()
+
+                if (statusPolitica) {
+                    FirebaseMessaging.getInstance().subscribeToTopic("politica")
+                    Toast.makeText(this, "Inscrição Política Realizada com Sucesso", Toast.LENGTH_LONG).show()
+                }
+                else {
+                    FirebaseMessaging.getInstance().unsubscribeFromTopic("sports")
+                    Toast.makeText(this, "Inscrição Política Cancelada", Toast.LENGTH_LONG).show()
+                }
             }
             R.id.button_CadastrarToken -> {
                 Toast.makeText(this, "Button Cadastrar Token", Toast.LENGTH_LONG).show()
