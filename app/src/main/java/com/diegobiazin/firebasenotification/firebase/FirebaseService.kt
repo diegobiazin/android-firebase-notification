@@ -1,6 +1,5 @@
 package com.diegobiazin.firebasenotification.firebase
 
-import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
@@ -19,7 +18,19 @@ import com.google.firebase.messaging.RemoteMessage
 class FirebaseService : FirebaseMessagingService() {
 
     override fun onMessageReceived(remoteMessage: RemoteMessage?) {
-        if (remoteMessage?.notification != null) {
+
+        if (remoteMessage?.data!!.isNotEmpty()) {
+            val msg = remoteMessage.data["mensagem"]
+            val titulo = remoteMessage.data["titulo"]
+            val nome = remoteMessage.data["nome"]
+            val urlImagem = remoteMessage.data["urlImagem"]
+
+            val mensagem = "$msg -- $nome -- $urlImagem"
+
+            sendNotification_1(titulo, mensagem)
+        }
+
+        if (remoteMessage.notification != null) {
             Log.d("diegobiazin.com", remoteMessage.notification?.title)
             Log.d("diegobiazin.com", remoteMessage.notification?.body)
 
