@@ -12,6 +12,11 @@ import android.net.Uri
 import android.os.Build
 import android.support.v4.app.NotificationCompat
 import android.util.Log
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.DataSource
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
 import com.diegobiazin.firebasenotification.MainActivity
 import com.diegobiazin.firebasenotification.R
 import com.google.firebase.messaging.FirebaseMessagingService
@@ -75,36 +80,60 @@ class FirebaseService : FirebaseMessagingService() {
 
     private fun sendNotification_2(titulo: String?, msg: String?, url: String?) {
 
-        val bitMap : Bitmap = Picasso.get().load(url).get()
+        Glide.with(baseContext).asBitmap().load(url).listener(object : RequestListener<Bitmap> {
+            override fun onLoadFailed(
+                e: GlideException?,
+                model: Any?,
+                target: Target<Bitmap>?,
+                isFirstResource: Boolean
+            ): Boolean {
+                return false
+            }
 
-        val intent: Intent = Intent(this, MainActivity::class.java)
-        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
+            override fun onResourceReady(
+                bitmap: Bitmap?,
+                model: Any?,
+                target: Target<Bitmap>?,
+                dataSource: DataSource?,
+                isFirstResource: Boolean
+            ): Boolean {
+                val intent: Intent = Intent(baseContext, MainActivity::class.java)
+                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
 
-        val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT)
+                val pendingIntent = PendingIntent.getActivity(baseContext, 0, intent, PendingIntent.FLAG_ONE_SHOT)
 
-        val channel = getString(R.string.default_notification_channel_id)
+                val channel = getString(R.string.default_notification_channel_id)
 
-        val sound: Uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
+                val sound: Uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION)
 
-        val notification = NotificationCompat.Builder(this, channel)
-            .setSmallIcon(R.mipmap.ic_launcher)
-            .setContentTitle(titulo)
-            .setContentText(msg)
-            .setSound(sound)
-            .setAutoCancel(true)
-            .setLargeIcon(bitMap)
-            .setStyle(NotificationCompat.BigPictureStyle().bigPicture(bitMap))
-            .setContentIntent(pendingIntent)
+                val notification = NotificationCompat.Builder(baseContext, channel)
+                    .setSmallIcon(R.mipmap.ic_launcher)
+                    .setContentTitle(titulo)
+                    .setContentText(msg)
+                    .setSound(sound)
+                    .setAutoCancel(true)
+                    .setLargeIcon(bitmap)
+            .setStyle(NotificationCompat.BigPictureStyle().bigPicture(bitmap))
+//                    .setStyle(NotificationCompat.BigTextStyle().bigText(msg))
+                    .setContentIntent(pendingIntent)
 
-        val notificationManager: NotificationManager =
-            getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+                val notificationManager: NotificationManager =
+                    getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notificationChannel = NotificationChannel(channel, "channel", NotificationManager.IMPORTANCE_DEFAULT)
-            notificationManager.createNotificationChannel(notificationChannel)
-        }
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    val notificationChannel =
+                        NotificationChannel(channel, "channel", NotificationManager.IMPORTANCE_DEFAULT)
+                    notificationManager.createNotificationChannel(notificationChannel)
+                }
 
-        notificationManager.notify(0, notification.build())
+                notificationManager.notify(0, notification.build())
+
+                return false
+            }
+        }).submit()
+
+//        val bitMap : Bitmap = Picasso.get().load(url).get()
+
     }
 
     override fun onNewToken(token: String?) {
